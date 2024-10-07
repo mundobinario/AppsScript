@@ -1,0 +1,53 @@
+function CambiarNombre() {
+  // ID de la hoja de cálculo vinculada a AppSheet
+  var spreadsheetId = 'ID_DE_TU_HOJA_DE_CALCULO'; // Tu hoja de cálculo
+  var sheet = SpreadsheetApp.openById(spreadsheetId).getSheetByName('NOOMBRE_DE_TU_HOJA'); // Nombre de la hoja
+  
+  // ID de la carpeta donde AppSheet guarda las imágenes
+  var folderAppSheetId = 'ID_DE_TU_CARPETA'; // Carpeta de AppSheet
+  
+  // ID de la carpeta destino donde se copiarán las imágenes renombradas
+  var folderDestinoId = 'ID_DE_TU_CARPETA'; // Carpeta de destino
+  
+  // Obtener todos los datos de la hoja de cálculo
+  var data = sheet.getDataRange().getValues();
+  
+  // Definir los índices de las columnas (basado en tu estructura: IdPersona, NombrePersona, FotoPersona)
+  var nombreColIndex = 1; // Columna "NombrePersona"
+  var fotoColIndex = 2;   // Columna "FotoPersona"
+  
+  // Obtener la carpeta de origen donde AppSheet guarda las imágenes
+  var folderAppSheet = DriveApp.getFolderById(folderAppSheetId);
+  
+  for (var i = 1; i < data.length; i++) { // Itera desde la segunda fila, ignorando los encabezados
+    var nombrePersona = data[i][nombreColIndex];
+    var fotoPath = data[i][fotoColIndex];
+    
+    if (fotoPath) {
+      // Extraer el nombre del archivo de la ruta relativa
+      var fileName = fotoPath.split("/").pop(); // Si fotoPath no contiene '/', fileName será simplemente fotoPath
+      
+      // Buscar el archivo en la carpeta de AppSheet
+      var files = folderAppSheet.getFilesByName(fileName);
+      
+      if (files.hasNext()) {
+        var file = files.next();
+        
+        // Obtener la carpeta de destino
+        var folderDestino = DriveApp.getFolderById(folderDestinoId);
+        
+        // Copiar el archivo a la carpeta de destino con el nuevo nombre
+        var nuevoNombre = nombrePersona + ".jpg";
+        var nuevoArchivo = file.makeCopy(nuevoNombre, folderDestino);
+        
+        // Generar la nueva URL para el archivo copiado
+        var nuevaUrl = "FotosDePerfil/" + nombrePersona + ".jpg";
+        
+        // Actualizar la columna 'FotoPersona' con la nueva URL en la hoja de cálculo
+        sheet.getRange(i + 1, fotoColIndex + 1).setValue(nuevaUrl);
+      } else {
+        Logger.log("No se encontró el archivo: " + fileName);
+      }
+    }
+  }
+}
