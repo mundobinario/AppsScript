@@ -1,0 +1,17 @@
+function backupSheet() { 
+  // Obtiene el archivo de la hoja de cálculo activa 
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet(); 
+ 
+  // Genera una fecha formateada para el nombre del backup 
+  var date = new Date(); 
+  var formattedDate = Utilities.formatDate(date, Session.getScriptTimeZone(), 'yyyy-MM-dd_HH-mm-ss'); 
+ 
+  // ID de la carpeta de Google Drive donde se guardarán los backups 
+  var folder = DriveApp.getFolderById('ID_CARPETA_DRIVE');  
+ 
+  // Crea una copia del archivo en la carpeta indicada 
+  var newFile = DriveApp.getFileById(spreadsheet.getId()).makeCopy(spreadsheet.getName() + '_Backup_' + formattedDate, folder); 
+ 
+  // Muestra un mensaje en el registro de ejecución (opcional) 
+  Logger.log('Backup creado: ' + newFile.getName()); 
+}
